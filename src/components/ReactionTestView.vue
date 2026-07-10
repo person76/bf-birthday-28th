@@ -21,9 +21,17 @@
       </div>
     </div>
 
+    <!-- 결과 표시 영역 (성공/실패에 따라 멘트가 다르게 뜹니다) -->
     <div v-if="status === 'result'" class="result-area">
       <p class="result-time">당신의 반응속도: <span>{{ reactionTime }}ms</span></p>
-      <p class="fail-reason">🏆 내 남친 통과 기준: 200ms 이하</p>
+
+      <!-- ⭕ 200ms 이하로 통과했을 때 뜨는 성공 문구 -->
+      <p v-if="reactionTime <= 200" class="success-reason">
+        🎉 [인증 성공] 역시 내 남자친구! 다이아 피지컬 인정합니다. <br />잠시 후 다음 단계로 이동합니다...
+      </p>
+
+      <!-- ❌ 200ms 초과했을 때 뜨는 기준 안내 문구 -->
+      <p v-else class="fail-reason">🏆 내 남친 통과 기준: 200ms 이하</p>
     </div>
 
     <button
@@ -65,20 +73,24 @@ const handleBoxClick = () => {
     // 억까 1: 초록 불 들어오기 전에 급해서 미리 누른 경우 (예측샷 실패)
     clearTimeout(timer.value)
     timer.value = null
-    emit('wrong', '❌ 부정 출발 감지!\n초록불도 안 켜졌는데 점멸을 빼다니요? 뇌절 플레이로 인해 처음으로 리부팅됩니다.')
+    emit('wrong', '❌ 부정 출발 감지!\n초록불도 안 켜졌는데 뭐하시나요? 뇌절 플레이 감지. 처음으로 리부팅됩니다.')
   } else if (status.value === 'ready') {
     const endTime = Date.now()
     reactionTime.value = endTime - startTime.value
     status.value = 'result'
 
-    // 💡 억까 2: 200ms 이하 실패 유도
+    // 판정 결과 처리
     setTimeout(() => {
       if (reactionTime.value <= 200) {
-        emit('finish')
+        // ⭕ 성공했을 때 화면에 성공 멘트를 유지하며 1.5초간 대기 후 통과
+        setTimeout(() => {
+          emit('finish')
+        }, 1500)
       } else {
-        emit('wrong', `❌ 반응속도 ${reactionTime.value}ms 측정 완료.\n\n이 속도로는 페이커는커녕 브론즈의 논타겟 스킬도 못 피합니다.\n롤 잘하는 내 남친일 리가 없습니다. 리부팅합니다.`)
+        // ❌ 실패했을 때 즉시 팅겨내기
+        emit('wrong', `❌ 반응속도 ${reactionTime.value}ms 측정 완료.\n\n이 속도로는 언랭 임서연 럭스의 속박도 못 피합니다.\n당신이 롤을 잘하는 내 남친일 리가 없습니다. \n리부팅합니다.`)
       }
-    }, 1200)
+    }, 200)
   }
 }
 
@@ -131,11 +143,25 @@ onUnmounted(() => {
 .result-time span { color: #ff3333; font-weight: bold; font-size: 24px; }
 .fail-reason { color: #888; font-size: 12px; margin-top: 5px; }
 
+/* 💡 성공 메시지 전용 예쁜 초록색 스타일 추가 */
+.success-reason {
+  color: #00ff66;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
 .start-btn {
   background-color: #00ff66; color: #000; border: none;
   padding: 14px 28px; font-size: 15px; font-weight: bold;
   border-radius: 6px; cursor: pointer; transition: 0.2s;
-  box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 255, 102, 0.2);
 }
 .start-btn:hover { background-color: #00cc55; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
