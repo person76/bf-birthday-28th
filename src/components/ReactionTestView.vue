@@ -1,11 +1,11 @@
 <template>
   <div class="secure-box reaction-container animate-fade-in">
     <span class="secure-badge">🎮 LOL PIXEL REFLEX TEST</span>
-    <h2>⚡ 롤 피지컬 생체 반응속도 측정 ⚡</h2>
+    <h2>⚡ 피지컬 반응속도 측정 ⚡</h2>
 
     <p class="desc">
-      진짜 내 남자친구라면 <strong style="color: #00ff66;">다이아급 피지컬</strong>을 증명해야 합니다.<br />
-      화면이 <strong style="color: #00ff66;">🟢 초록색</strong>으로 변하는 순간 점멸을 쓰듯 빛의 속도로 클릭하세요.
+      진짜 내 남자친구라면 <strong style="color: #00ff66;">다이아급 피지컬</strong>을 <br/>증명해야 합니다.
+      아래 화면이 <strong style="color: #00ff66;">🟢 초록색</strong>으로 변하는 순간 <br/> 빛의 속도로 클릭하세요.
     </p>
 
     <div
