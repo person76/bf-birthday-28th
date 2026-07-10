@@ -1,9 +1,8 @@
 <template>
   <div class="secure-box runaway-container animate-fade-in">
     <span class="secure-badge blink">CONSCIENCE TEST</span>
-    <h2>🚨 최종 양심 검증 🚨</h2>
+    <h2>🚨 양심 검증 🚨</h2>
     <p class="desc">
-      마지막 단계입니다. <br />
       당신은 당신의 여자친구를 얼마나 사랑합니까? <br />
       <span class="sub-desc">(정직하게 답변하지 않으면 시스템이 파괴됩니다.)</span>
     </p>
