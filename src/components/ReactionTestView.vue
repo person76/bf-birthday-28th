@@ -4,9 +4,8 @@
     <h2>⚡ 롤 피지컬 생체 반응속도 측정 ⚡</h2>
 
     <p class="desc">
-      최근 탐지된 로봇은 롤 실력이 형편없었습니다.<br />
       진짜 내 남자친구라면 <strong style="color: #00ff66;">다이아급 피지컬</strong>을 증명해야 합니다.<br />
-      화면이 <strong style="color: #00ff66;">🟢 초록색</strong>으로 변하는 순간 점멸(Flash)을 쓰듯 빛의 속도로 클릭하세요.
+      화면이 <strong style="color: #00ff66;">🟢 초록색</strong>으로 변하는 순간 점멸을 쓰듯 빛의 속도로 클릭하세요.
     </p>
 
     <div
@@ -25,13 +24,13 @@
     <div v-if="status === 'result'" class="result-area">
       <p class="result-time">당신의 반응속도: <span>{{ reactionTime }}ms</span></p>
 
-      <!-- ⭕ 200ms 이하로 통과했을 때 뜨는 성공 문구 -->
-      <p v-if="reactionTime <= 200" class="success-reason">
+      <!-- ⭕ 250ms 이하로 통과했을 때 뜨는 성공 문구 -->
+      <p v-if="reactionTime <= 250" class="success-reason">
         🎉 [인증 성공] 역시 내 남자친구! 다이아 피지컬 인정합니다. <br />잠시 후 다음 단계로 이동합니다...
       </p>
 
-      <!-- ❌ 200ms 초과했을 때 뜨는 기준 안내 문구 -->
-      <p v-else class="fail-reason">🏆 내 남친 통과 기준: 200ms 이하</p>
+      <!-- ❌ 250ms 초과했을 때 뜨는 기준 안내 문구 -->
+      <p v-else class="fail-reason">🏆 내 남친 통과 기준: 250ms 이하</p>
     </div>
 
     <button
@@ -81,7 +80,7 @@ const handleBoxClick = () => {
 
     // 판정 결과 처리
     setTimeout(() => {
-      if (reactionTime.value <= 200) {
+      if (reactionTime.value <= 250) {
         // ⭕ 성공했을 때 화면에 성공 멘트를 유지하며 1.5초간 대기 후 통과
         setTimeout(() => {
           emit('finish')
