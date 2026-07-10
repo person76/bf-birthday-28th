@@ -55,7 +55,7 @@ const inputPassword = ref('')
 const isWrong = ref(false)
 
 // 💡 2차 인증 비밀번호 설정
-const CORRECT_PASSWORD = '0313'
+const CORRECT_PASSWORD = '1249'
 
 const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60)
