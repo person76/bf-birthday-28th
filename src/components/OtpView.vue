@@ -1,122 +1,204 @@
 <template>
-  <div class="secure-box animate-fade-in">
-    <span class="secure-badge">LEVEL 2 SECURITY</span>
-    <h2>🔒 2차 OTP 인증 단계</h2>
-    <p class="desc">
-      보안 등급이 높아 추가 인증이 필요합니다.<br />
-      지금 즉시 관리자(여친)에게 카톡으로 <br />
-      <strong class="highlight">"인증번호 보내줘"</strong>라고 메시지를 보내 OTP 번호를 획득하십시오.
-    </p>
+  <div class="secure-box otp-container animate-fade-in">
+    <span class="secure-badge">FINAL STEP</span>
+    <h2>📞 최종 2차 음성 인증 📞</h2>
 
-    <div class="otp-input-container">
-      <input
-          v-model="otpInput"
-          type="text"
-          maxlength="4"
-          placeholder="0000"
-          @input="checkOTP"
-      />
+    <div class="hacker-timer">
+      <p class="timer-title">인증 유효 시간</p>
+      <p class="timer-clock">{{ formatTime(timeLeft) }}</p>
     </div>
 
-    <p v-if="isWrong" class="error-msg">⚠️ 올바르지 않은 인증번호입니다. (해킹 시도 감지)</p>
+    <p class="desc">
+      안전한 본인 확인을 위해 시스템 관리자(임서연)의 <br />
+      <strong>음성 암호 승인</strong>이 필요합니다. <br />
+      아래 버튼을 눌러 관리자에게 직접 암호를 요청하세요.
+    </p>
+
+    <!-- 🚨 서연님의 실제 전화번호로 변경해 주세요! -->
+    <a href="tel:010-7157-3451" class="phone-call-btn" @click="handleCallClick">
+      🤙 관리자에게 음성 암호 요청하기
+    </a>
+
+    <!-- 🔒 전화를 걸고 나면 비밀번호 입력창과 확인 버튼이 스르륵 나타납니다 -->
+    <div v-if="hasCalled" class="input-zone animate-fade-in">
+      <p class="input-guide">🔊 승인받은 암호 4자리를 입력하십시오.</p>
+
+      <input
+          v-model="inputPassword"
+          type="password"
+          maxlength="4"
+          placeholder="••••"
+          class="hacker-input"
+          @keyup.enter="checkPassword"
+      />
+
+      <button class="success-bridge-btn" @click="checkPassword">
+        🔓 시스템 잠금 해제 승인
+      </button>
+
+      <!-- 틀렸을 때만 뜨는 경고 문구 -->
+      <p v-if="isWrong" class="error-msg animate-shake">
+        ❌ 암호가 일치하지 않습니다. 다시 입력하세요.
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
-// 부모 컴포넌트인 SecurityContainer에게 성공했음을 알릴 이벤트 정의
 const emit = defineEmits(['success'])
 
-const otpInput = ref('')
+const timeLeft = ref(180)
+const hasCalled = ref(false)
+const inputPassword = ref('')
 const isWrong = ref(false)
 
-// 💡 남자친구에게 카톡으로 알려줄 정답 OTP 번호를 지정하세요! (예: 생일 뒤 4자리)
-const CORRECT_OTP = '0709'
+// 💡 2차 인증 비밀번호 설정
+const CORRECT_PASSWORD = '0313'
 
-const checkOTP = () => {
-  // 4자리가 모두 입력되면 자동으로 체크 시작
-  if (otpInput.value.length === 4) {
-    if (otpInput.value === CORRECT_OTP) {
-      isWrong.value = false
-      emit('success') // 부모에게 성공 알림 -> 다음(성공) 단계로 이동
-    } else {
-      isWrong.value = true
-      otpInput.value = '' // 틀리면 입력창 비우기
-    }
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
+const handleCallClick = () => {
+  hasCalled.value = true
+  isWrong.value = false
+}
+
+// 💡 입력한 비밀번호 검증 함수
+const checkPassword = () => {
+  if (inputPassword.value === CORRECT_PASSWORD) {
+    isWrong.value = false
+    emit('success') // 정답이면 핑크 화면으로 점프!
+  } else {
+    isWrong.value = true // 틀리면 에러 메시지 띄우기
+    inputPassword.value = '' // 입력창 초기화
   }
 }
+
+let timerInterval = null
+onMounted(() => {
+  timerInterval = setInterval(() => {
+    if (timeLeft.value > 0) {
+      timeLeft.value--
+    } else {
+      timeLeft.value = 180
+    }
+  }, 1000)
+})
+
+onUnmounted(() => {
+  clearInterval(timerInterval)
+})
 </script>
 
 <style scoped>
-/* SecurityContainer 내부의 .secure-box 스타일과 통일 */
-.secure-box {
+.otp-container {
   text-align: center;
-  border: 2px solid #00ff66;
-  padding: 40px;
-  border-radius: 8px;
-  background-color: #121212;
-  box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
   max-width: 450px;
-  width: 100%;
+  width: 90%;
+  padding: 40px 20px;
 }
 
-.secure-badge {
-  font-size: 12px;
-  background: #ff3333;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
+.hacker-timer {
+  background-color: #000;
+  border: 1px solid #ff3333;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px auto;
+  width: 60%;
+  box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+}
+.timer-title { font-size: 11px; color: #888; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+.timer-clock { font-size: 28px; color: #ff3333; font-weight: bold; margin: 5px 0 0 0; font-family: 'Courier New', Courier, monospace; }
+
+.desc { font-size: 14px; line-height: 1.6; color: #aaa; margin-bottom: 30px; }
+
+.phone-call-btn {
+  display: block;
+  background-color: #ff3333;
+  color: #fff;
+  text-decoration: none;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+  transition: all 0.2s;
+  margin-bottom: 25px;
+}
+.phone-call-btn:hover { background-color: #cc2222; }
+
+/* 🔒 [NEW] 입력 영역 스타일 */
+.input-zone {
+  border-top: 1px dashed #333;
+  padding-top: 25px;
+  margin-top: 20px;
+}
+.input-guide {
+  font-size: 13px;
+  color: #00ff66;
+  margin-bottom: 12px;
   font-weight: bold;
 }
-
-.desc {
-  color: #aaa;
-  line-height: 1.6;
-  margin: 20px 0;
-  font-size: 14px;
-}
-
-.highlight {
-  color: #fff;
-  text-decoration: underline;
-}
-
-/* 큼직한 OTP 입력창 스타일 */
-.otp-input-container {
-  margin-top: 25px;
-}
-
-.otp-input-container input {
-  background: #222;
-  border: 1px solid #00ff66;
+.hacker-input {
+  background: #000;
+  border: 2px solid #333;
   color: #00ff66;
-  font-size: 32px;
+  font-size: 24px;
   text-align: center;
   padding: 10px;
-  width: 160px;
+  width: 50%;
+  border-radius: 6px;
   letter-spacing: 8px;
-  border-radius: 4px;
-  outline: none;
+  margin-bottom: 15px;
   font-family: 'Courier New', Courier, monospace;
 }
-
-.otp-input-container input::placeholder {
-  color: #333;
+.hacker-input:focus {
+  outline: none;
+  border-color: #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
 }
+
+.success-bridge-btn {
+  background-color: #00ff66;
+  color: #000;
+  border: none;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+}
+.success-bridge-btn:hover { background-color: #00cc55; }
 
 .error-msg {
   color: #ff3333;
-  font-size: 13px;
-  margin-top: 15px;
+  font-size: 12px;
+  margin-top: 12px;
+  font-weight: bold;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s ease forwards;
-}
+/* 애니메이션 효과 */
+.animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.animate-shake { animation: shake 0.3s ease-in-out; }
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 </style>

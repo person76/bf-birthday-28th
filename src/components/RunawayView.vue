@@ -1,18 +1,31 @@
 <template>
-  <div ref="containerRef" class="secure-box animate-fade-in">
-    <h2>❤️ 마지막 양심 테스트</h2>
-    <p class="question-text">현재 당신은 여친을 얼마나 사랑하고 있습니까?</p>
+  <div class="secure-box runaway-container animate-fade-in">
+    <span class="secure-badge blink">CONSCIENCE TEST</span>
+    <h2>🚨 최종 양심 검증 🚨</h2>
+    <p class="desc">
+      마지막 단계입니다. <br />
+      당신은 당신의 여자친구를 얼마나 사랑합니까? <br />
+      <span class="sub-desc">(정직하게 답변하지 않으면 시스템이 파괴됩니다.)</span>
+    </p>
 
     <div class="btn-group">
-      <button class="love-btn" @click="$emit('finish')">우주만큼 사랑함 (인증 완료)</button>
-
+      <!-- 💖 우주만큼 사랑함 버튼 (크기가 은근히 커짐) -->
       <button
-          class="hate-btn"
-          :style="btnStyle"
-          @mouseover="runAway"
-          @click="runAway"
+          class="love-max-btn"
+          :style="{ transform: `scale(${1 + clickCount * 0.08})` }"
+          @click="handleSuccess"
       >
-        조금 사랑함
+        ❤️ 우주가 무너져도 사랑함 ❤️
+      </button>
+
+      <!-- 💔 조금 사랑함 버튼 (누를 때마다 작아지고 글자가 바뀜) -->
+      <button
+          v-if="isFakeVisible"
+          class="love-mini-btn"
+          :style="{ scale: fakeScale, opacity: fakeOpacity }"
+          @click="handleFakeClick"
+      >
+        {{ fakeText }}
       </button>
     </div>
   </div>
@@ -21,100 +34,112 @@
 <script setup>
 import { ref } from 'vue'
 
-defineEmits(['finish'])
+const emit = defineEmits(['finish'])
 
-const containerRef = ref(null)
+const clickCount = ref(0)
+const isFakeVisible = ref(true)
+const fakeScale = ref(1)
+const fakeOpacity = ref(1)
+const fakeText = ref('그냥 조금 사랑함')
 
-// 💡 처음에는 제자리에 평범하게 있다가 움직이도록 설정
-const btnStyle = ref({
-  position: 'relative',
-  top: '0px',
-  left: '0px'
-})
+// 킹받는 멘트 변화 리스트
+const textStages = [
+  '그냥 조금 사랑함',
+  '앗 잘못 누름 진짜 조금임',
+  '어라 버튼이 왜 작아지지?',
+  '진심이야...?',
+  '이래도 누른다고?',
+  '누를 수 있으면 눌러봐ㅋ'
+]
 
-const runAway = () => {
-  if (!containerRef.value) return
+const handleFakeClick = () => {
+  clickCount.value++
 
-  // 1. 초록색 상자(부모 박스)의 실제 크기와 패딩 공간을 계산합니다.
-  const containerWidth = containerRef.value.clientWidth
-  const containerHeight = containerRef.value.clientHeight
+  // 1. 텍스트 변경
+  if (clickCount.value < textStages.length) {
+    fakeText.value = textStages[clickCount.value]
+  }
 
-  // 2. 버튼이 박스 테두리를 뚫고 나가지 않도록 안전 범위를 좁게 잡습니다.
-  // 상자 정중앙 기준 가로 ±120px, 세로 -30px ~ +80px 범위 내에서만 움직이게 제약합니다.
-  const minX = -100
-  const maxX = 100
-  const minY = -20
-  const maxY = 60
+  // 2. 크기와 투명도 서서히 축소
+  fakeScale.value = Math.max(0, 1 - clickCount.value * 0.18)
+  fakeOpacity.value = Math.max(0, 1 - clickCount.value * 0.15)
 
-  // 3. 지정된 좁은 범위 안에서 무작위 좌표를 생성합니다.
-  const randomLeft = Math.floor(Math.random() * (maxX - minX + 1)) + minX
-  const randomTop = Math.floor(Math.random() * (maxY - minY + 1)) + minY
+  // 3. 완전히 작아지면 버튼 삭제 (더 이상 못 누르게 격리)
+  if (fakeScale.value <= 0.1) {
+    isFakeVisible.value = false
+  }
+}
 
-  // 4. position을 relative로 유지하여 상자 내부 안에서만 좌표가 변하도록 합니다.
-  btnStyle.value.position = 'relative'
-  btnStyle.value.left = `${randomLeft}px`
-  btnStyle.value.top = `${randomTop}px`
+const handleSuccess = () => {
+  // 우주만큼 사랑함을 누르면 최종 OTP 입력 단계로 이동!
+  emit('finish')
 }
 </script>
 
 <style scoped>
-.secure-box {
-  position: relative; /* 자식 요소들의 기준점 역할 */
+.runaway-container {
   text-align: center;
-  border: 2px solid #00ff66;
-  padding: 40px;
-  border-radius: 8px;
-  background-color: #121212;
-  box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
   max-width: 450px;
-  width: 100%;
-  min-height: 280px; /* 버튼이 상하로 움직일 공간 확보 */
-  overflow: hidden;  /* 혹시나 경계를 넘어가면 깔끔하게 가려줌 */
+  width: 90%;
+  padding: 40px 20px;
 }
 
-.question-text {
-  font-size: 18px;
-  margin: 20px 0 30px 0;
-  color: #fff;
-  line-height: 1.5;
+.sub-desc {
+  font-size: 12px;
+  color: #ff3333;
+  display: block;
+  margin-top: 5px;
 }
 
 .btn-group {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 20px;
-  margin-top: 40px;
+  margin-top: 35px;
+  min-height: 160px; /* 버튼이 사라져도 레이아웃이 무너지지 않게 지탱 */
 }
 
-button {
-  padding: 12px 20px;
-  font-size: 15px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-family: 'Courier New', Courier, monospace;
-}
-
-.love-btn {
-  background: #00ff66;
+/* 정답 버튼: 누를수록 웅장해짐 */
+.love-max-btn {
+  background-color: #00ff66;
   color: #000;
-  z-index: 10; /* 정답 버튼이 무조건 위에 오도록 보장 */
+  border: none;
+  padding: 16px 24px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease-out, background-color 0.2s;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+}
+.love-max-btn:hover {
+  background-color: #00cc55;
 }
 
-/* 💡 도망가는 버튼 스타일 핵심 수정 */
-.hate-btn {
-  background: #333;
-  color: #888;
-  z-index: 5;
-  /* 0.25초 동안 스르륵 미끄러지듯 도망가서 움직임이 눈에 선명하게 보입니다 */
-  transition: transform 0.2s ease, left 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+/* 오답 버튼: 누를수록 작아지고 소멸함 */
+.love-mini-btn {
+  background-color: #1a1a1a;
+  color: #ff3333;
+  border: 1px solid #ff3333;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  max-width: 280px;
+  transition: all 0.15s ease-out;
+  transform-origin: center; /* 가운데를 기준으로 줄어들게 설정 */
 }
 
-.animate-fade-in { animation: fadeIn 0.4s ease forwards; }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.blink {
+  animation: blinker 1.5s linear infinite;
+}
+@keyframes blinker {
+  50% { opacity: 0; }
 }
 </style>

@@ -20,38 +20,53 @@
         :current-index="currentQuizIndex"
         :total-quizzes="quizList.length"
         @correct="handleCorrect"
-        @wrong="(idx) => resetAll(idx)"
+        @wrong="resetAll"
     />
 
-    <RunawayView v-else-if="subStep === 'runaway'" @finish="subStep = 'otp'" />
+    <RunawayView v-else-if="subStep === 'runaway'" @finish="subStep = 'video'"/>
 
-    <!-- STEP 4: OTP 번호 입력 화면 -->
-    <OtpView v-else-if="subStep === 'otp'" @success="subStep = 'success'" />
+    <VideoAuthView
+        v-else-if="subStep === 'video'"
+        @finish="subStep = 'otp'"
+        @wrong="handleVideoWrong"
+    />
 
-    <!-- STEP 5: 최종 성공 화면 (💡 컴포넌트 호출로 깔끔하게 변경!) -->
-    <SuccessBirthdayView v-else-if="subStep === 'success'" />
+    <OtpView v-else-if="subStep === 'otp'" @success="subStep = 'success'"/>
+
+    <SuccessBirthdayView v-else-if="subStep === 'success'"/>
+
+    <div v-if="isAlertOpen" class="alert-overlay">
+      <div class="custom-alert-box">
+        <div class="alert-header">🚨 SECURITY WARNING</div>
+        <p class="alert-body">{{ alertMessage }}</p>
+        <button class="alert-close-btn" @click="closeAlert">시스템 재부팅 (처음으로)</button>
+      </div>
+    </div>
 
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 import Quiz from './Quiz.vue'
 import RunawayView from './RunawayView.vue'
 import OtpView from './OtpView.vue'
-import SuccessBirthdayView from './SuccessBirthdayView.vue' // 💡 여기에 추가!
+import SuccessBirthdayView from './SuccessBirthdayView.vue'
+import gfPic1 from '@/assets/돼지.jpeg'
+import gfPic2 from '@/assets/강아지.png'
+import gfPic3 from '@/assets/내사진.jpeg'
+import gfPic4 from '@/assets/장원영.jpg'
+import VideoAuthView from "@/components/VideoAuthView.vue";
 
-// 💡 subStep 단계 축소: intro -> quiz -> runaway -> otp -> success
 const subStep = ref('intro')
 const currentQuizIndex = ref(0)
-
 const isAlertOpen = ref(false)
 const alertMessage = ref('')
 
 const quizList = [
   {
     question: 'Q1. 다음 중 사라지면 가장 슬퍼할 것은?',
-    options: ['롤 챔프 에코', '반도체 주식', '임서연', '딱히 다 안 슬픔'],
+    options: ['롤 챔피언 에코', '반도체 주식', '임서연', '딱히 다 안 슬픔'],
     answerIndex: 2,
     hint: '힌트: 목숨은 하나뿐입니다. 신중하게 선택하세요.',
     wrongMessages: [
@@ -74,8 +89,21 @@ const quizList = [
     wrongMessages: [
       '❌ "지금 나한테 화낸거야?" 임서연은 화나서 집에 가버렸네요.',
       '❌ "어쩌라고."  임서연은 화나서 집에 가버렸네요.',
-      '❌ "그러네, 우리 사이보다 확실히 좋아보이네" 임서연은 화나서 집에 가버렸네요."',
+      '❌ "그러네, 우리 사이보다 확실히 좋아보이네" 임서연은 화나서 집에 가버렸네요.',
       ''
+    ]
+  },
+  {
+    question: 'Q3. [보안 검증] 시스템에 등록된 데이터와 일치하는 당신의 진짜 여자친구를 고르십시오.',
+    isImageQuiz: true,
+    options: [gfPic1, gfPic2, gfPic3, gfPic4],
+    answerIndex: 2,
+    hint: '힌트: 세상에서 가장 예쁜 사람을 고르면 보안이 해제됩니다.',
+    wrongMessages: [
+      '❌ 죽을래? ',
+      '❌ 귀여움 정도는 비슷하지만 아쉽게 아니네요.',
+      '',
+      '❌ 놀랄정도로 닮았지만 아쉽게 아니네요.'
     ]
   }
 ]
@@ -84,38 +112,51 @@ const handleCorrect = () => {
   if (currentQuizIndex.value < quizList.length - 1) {
     currentQuizIndex.value++
   } else {
-    // 💡 수정됨: 모든 퀴즈를 맞추면 바로 runaway(도망가는 버튼)로 점프!
     subStep.value = 'runaway'
   }
 }
 
+// 퀴즈 전용 실패 함수
 const resetAll = (optionIndex) => {
   const targetQuiz = quizList[currentQuizIndex.value]
-  alertMessage.value = targetQuiz.wrongMessages[optionIndex] || '❌ 본인 인증에 실패했습니다.'
+  if (optionIndex === undefined || optionIndex === null || typeof optionIndex === 'object') {
+    alertMessage.value = '❌ 오답입니다! 본인 인증에 실패하여 처음으로 돌아갑니다.'
+  } else {
+    alertMessage.value = targetQuiz.wrongMessages[optionIndex] || '❌ 본인 인증에 실패했습니다.'
+  }
   isAlertOpen.value = true
 }
 
-const closeModal = () => {
-  isAlertOpen.value = false
+// 🎬 [수정 완료] 비디오 전용 실패 처리 핸들러 함수 배치
+const handleVideoWrong = (msg) => {
+  alertMessage.value = msg
+  isAlertOpen.value = true
 }
 
+// 🔓 [수정 완료] 갇혀있던 함수를 밖으로 꺼내서 알람이 정상적으로 꺼지고 리셋되도록 수정
 const closeAlert = () => {
   isAlertOpen.value = false
   subStep.value = 'intro'
   currentQuizIndex.value = 0
 }
 </script>
+
 <style scoped>
-/* 기본 블랙 풀 스크린 레이아웃 */
+/* 기존 CSS 스타일과 동일 (그대로 유지) */
 .black-full-screen {
   position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: #0b0b0b;
   color: #00ff66;
-  display: flex; justify-content: center; align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
 }
 
-/* 기본 보안 상자 디자인 */
 .secure-box {
   text-align: center;
   border: 2px solid #00ff66;
@@ -127,80 +168,123 @@ const closeAlert = () => {
   width: 90%;
 }
 
-.secure-badge { font-size: 12px; background: #ff3333; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-.desc { color: #aaa; line-height: 1.6; margin: 20px 0; font-size: 14px; }
-.next-btn { background-color: #00ff66; color: black; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-.next-btn:hover { background-color: #00cc55; }
-
-/* ---------------------------------------------------------------- */
-/* 🎀 [NEW] 최종 성공 시 반전되는 핑크색 페이지 스타일 */
-/* ---------------------------------------------------------------- */
-.secure-box.pink-version {
-  background-color: #fff0f5;  /* 화사한 라벤더 핑크 배경 */
-  border: 3px solid #ff6699;  /* 진한 핑크색 테두리 */
-  color: #ff3366;             /* 텍스트 핑크색 메인 컬러 */
-  box-shadow: 0 0 30px rgba(255, 102, 153, 0.3); /* 핑크빛 네온 효과 */
-}
-
-.pink-version h2 {
-  font-size: 28px;
-  color: #ff3366;
-  margin-bottom: 10px;
-  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
-}
-
-.pink-version .greet {
-  font-size: 18px;
+.secure-badge {
+  font-size: 12px;
+  background: #ff3333;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 5px;
 }
 
-.pink-version .greet-sub {
+.desc {
+  color: #aaa;
+  line-height: 1.6;
+  margin: 20px 0;
   font-size: 14px;
-  color: #666;
-  margin-bottom: 25px;
-  line-height: 1.4;
 }
 
-/* 핑크 버전 내부 기프트 카드 */
-.pink-version .gift-card {
-  background: #ffffff;
-  border: 2px dashed #ff6699;
-  padding: 25px 20px;
-  border-radius: 8px;
-  color: #444;
-}
-
-.pink-version .gift-card h3 {
-  color: #ff3366;
-  margin-bottom: 15px;
-  font-size: 18px;
-}
-
-.pink-version .gift-item {
-  font-size: 14px;
-  margin: 8px 0;
-  color: #555;
-}
-
-.pink-version .love-msg {
-  color: #ff0055;
-  font-size: 15px;
+.next-btn {
+  background-color: #00ff66;
+  color: black;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
   font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
   margin-top: 20px;
-  border-top: 1px solid #ffe6ee;
-  padding-top: 15px;
+  transition: 0.2s;
 }
 
-/* 공통 알람창 및 애니메이션 스타일 */
-.alert-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 99999; }
-.custom-alert-box { background: #151515; border: 2px solid #ff3333; box-shadow: 0 0 30px rgba(255, 51, 51, 0.3); border-radius: 8px; width: 90%; max-width: 400px; text-align: center; overflow: hidden; animation: shake 0.4s ease-in-out; }
-.alert-header { background: #ff3333; color: #fff; padding: 10px; font-weight: bold; font-size: 14px; letter-spacing: 1px; }
-.alert-body { color: #fff; padding: 30px 20px; line-height: 1.6; font-size: 15px; margin: 0; }
-.alert-close-btn { background: #222; border: none; border-top: 1px solid #333; color: #ff3333; width: 100%; padding: 15px; font-size: 14px; font-weight: bold; cursor: pointer; }
-.alert-close-btn:hover { background: #ff3333; color: #fff; }
-@keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
-.animate-fade-in { animation: fadeIn 0.4s ease forwards; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.next-btn:hover {
+  background-color: #00cc55;
+}
+
+.alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999999 !important;
+}
+
+.custom-alert-box {
+  background: #151515;
+  border: 2px solid #ff3333;
+  box-shadow: 0 0 30px rgba(255, 51, 51, 0.3);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  overflow: hidden;
+  animation: shake 0.4s ease-in-out;
+}
+
+.alert-header {
+  background: #ff3333;
+  color: #fff;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.alert-body {
+  color: #fff;
+  padding: 30px 20px;
+  line-height: 1.6;
+  font-size: 15px;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.alert-close-btn {
+  background: #222;
+  border: none;
+  border-top: 1px solid #333;
+  color: #ff3333;
+  width: 100%;
+  padding: 15px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.alert-close-btn:hover {
+  background: #ff3333;
+  color: #fff;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-6px);
+  }
+  40%, 80% {
+    transform: translateX(6px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>
