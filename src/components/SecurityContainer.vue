@@ -5,8 +5,8 @@
       <span class="secure-badge">SYSTEM ERROR</span>
       <h2>🚨 어... 잠깐만... 🚨</h2>
       <p class="desc">
-        최근 내 남자친구의 귀여움과 다정함이 한도를 초과하여,<br />
-        <strong style="color: #fff;">외부 해킹(또는 로봇)</strong>으로 의심되는 정황이 포착되었습니다.
+        최근 내 남자친구의 귀여움과 다정함이 <br /> 한도를 초과하여,<br />
+        <strong style="color: #fff;">외부 해킹(또는 로봇)</strong>으로 의심되는 <br/> 정황이 포착되었습니다.
       </p>
       <p class="desc" style="color: #ff3333; font-weight: bold;">
         당신은 정말 내 남자친구가 맞습니까?
