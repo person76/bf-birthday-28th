@@ -23,7 +23,13 @@
         @wrong="resetAll"
     />
 
-    <RunawayView v-else-if="subStep === 'runaway'" @finish="subStep = 'video'"/>
+    <RunawayView v-else-if="subStep === 'runaway'" @finish="subStep = 'reaction'"/>
+
+    <ReactionTestView
+        v-else-if="subStep === 'reaction'"
+        @finish="subStep = 'video'"
+        @wrong="handleVideoWrong"
+    />
 
     <VideoAuthView
         v-else-if="subStep === 'video'"
@@ -60,6 +66,7 @@ import RunawayView from './RunawayView.vue'
 import OtpView from './OtpView.vue'
 import SuccessBirthdayView from './SuccessBirthdayView.vue'
 import VideoAuthView from "@/components/VideoAuthView.vue";
+import ReactionTestView from './ReactionTestView.vue'
 
 // 📸 퀴즈 보기용 사진들
 import gfPic1 from '@/assets/돼지.jpeg'
