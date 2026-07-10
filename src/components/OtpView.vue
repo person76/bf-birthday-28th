@@ -1,7 +1,7 @@
 <template>
   <div class="secure-box otp-container animate-fade-in">
     <span class="secure-badge">FINAL STEP</span>
-    <h2>📞 최종 2차 음성 인증 📞</h2>
+    <h2>📞 최종 음성 인증 📞</h2>
 
     <div class="hacker-timer">
       <p class="timer-title">인증 유효 시간</p>
