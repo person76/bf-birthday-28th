@@ -24,13 +24,13 @@
     <div v-if="status === 'result'" class="result-area">
       <p class="result-time">당신의 반응속도: <span>{{ reactionTime }}ms</span></p>
 
-      <!-- ⭕ 250ms 이하로 통과했을 때 뜨는 성공 문구 -->
-      <p v-if="reactionTime <= 250" class="success-reason">
+      <!-- ⭕ 300ms 이하로 통과했을 때 뜨는 성공 문구 -->
+      <p v-if="reactionTime <= 300" class="success-reason">
         🎉 [인증 성공] 역시 내 남자친구! 다이아 피지컬 인정합니다. <br />잠시 후 다음 단계로 이동합니다...
       </p>
 
-      <!-- ❌ 250ms 초과했을 때 뜨는 기준 안내 문구 -->
-      <p v-else class="fail-reason">🏆 내 남친 통과 기준: 250ms 이하</p>
+      <!-- ❌ 300ms 초과했을 때 뜨는 기준 안내 문구 -->
+      <p v-else class="fail-reason">🏆 내 남친 통과 기준: 300ms 이하</p>
     </div>
 
     <button
@@ -80,7 +80,7 @@ const handleBoxClick = () => {
 
     // 판정 결과 처리
     setTimeout(() => {
-      if (reactionTime.value <= 250) {
+      if (reactionTime.value <= 300) {
         // ⭕ 성공했을 때 화면에 성공 멘트를 유지하며 1.5초간 대기 후 통과
         setTimeout(() => {
           emit('finish')
